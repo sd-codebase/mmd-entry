@@ -8,15 +8,26 @@ const { Title, Text } = Typography;
 
 interface MarkdownRendererProps {
   content?: TopicLevelMap | null;
+  topics?: Record<string, string>; // topic to levels mapping
 }
 
 interface EditedQuestionData {
+  questionContent?: string;
+  topic: string;
   content: string;
   level: string;
   answer: string;
 }
 
-export function MarkdownRenderer({ content }: MarkdownRendererProps) {
+const Topics = {
+  "Topic 1": "Math",
+  "Topic 2": "Science",
+  "Topic 3": "History",
+};
+export function MarkdownRenderer({
+  content,
+  topics = Topics,
+}: MarkdownRendererProps) {
   const [editedQuestions, setEditedQuestions] = useState<
     Record<string, EditedQuestionData>
   >({});
@@ -29,6 +40,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         questions.forEach((question: MappedQuestion) => {
           const questionId = `${topic}-${question.questionNumber}`;
           initialContent[questionId] = {
+            ...question,
             content: question.questionContent,
             level: question.level,
             answer: question.answer,
@@ -67,6 +79,21 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       </Card>
     );
   }
+
+  const handleSubmit = () => {
+    // Flatten editedQuestions and map topic names
+    const flatQuestions = Object.entries(editedQuestions).map(([id, data]) => {
+      // id format: topic-questionNumber
+      // const [topicKey, questionNumber] = id.split(/-(.+)/); // split only on first dash
+      const newData = {
+        ...data,
+        topic: topics[data.topic],
+      };
+      delete newData.questionContent;
+      return newData;
+    });
+    console.log("Edited Questions (flattened):", flatQuestions);
+  };
 
   return (
     <Card title="Processed Content" style={{ marginTop: "16px" }}>
@@ -135,7 +162,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
                           e.target.value
                         )
                       }
-                      rows={8}
+                      autoSize={{ minRows: 4, maxRows: 16 }}
                       style={{ fontFamily: "monospace", fontSize: "13px" }}
                     />
                   </Col>
@@ -177,6 +204,23 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           })}
         </div>
       ))}
+      <div style={{ textAlign: "right", marginTop: "24px" }}>
+        <button
+          type="button"
+          style={{
+            background: "#1890ff",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+            padding: "8px 24px",
+            fontSize: "16px",
+            cursor: "pointer",
+          }}
+          onClick={handleSubmit}
+        >
+          Submit
+        </button>
+      </div>
     </Card>
   );
 }
