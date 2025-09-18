@@ -11,11 +11,9 @@ import {
   theme,
   Typography,
 } from "antd";
-import React, { useContext } from "react";
-
+import React, { useContext, useEffect, useState } from "react";
 const { Text } = Typography;
-const { useToken } = theme;
-
+const useToken = theme.useToken;
 type IUser = {
   id: number;
   name: string;
@@ -28,6 +26,18 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({
   const { token } = useToken();
   const { data: user } = useGetIdentity<IUser>();
   const { mode, setMode } = useContext(ColorModeContext);
+
+  // State for course name
+  const [courseName, setCourseName] = useState<string>("");
+
+  useEffect(() => {
+    fetch("/api/course")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.name) setCourseName(data.name);
+      })
+      .catch(() => {});
+  }, []);
 
   const headerStyles: React.CSSProperties = {
     backgroundColor: token.colorBgElevated,
@@ -47,6 +57,12 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({
   return (
     <AntdLayout.Header style={headerStyles}>
       <Space>
+        {/* Show course name before theme switch */}
+        {courseName && (
+          <Text strong style={{ marginRight: "16px", fontSize: "16px" }}>
+            {courseName}
+          </Text>
+        )}
         <Switch
           checkedChildren="🌛"
           unCheckedChildren="🔆"

@@ -33,7 +33,6 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <Suspense>
-          <GitHubBanner />
           <RefineKbarProvider>
             <AntdRegistry>
               <ColorModeContextProvider defaultMode={defaultMode}>
