@@ -1,0 +1,40 @@
+/* Styles for MathJax and mathpix-mmd rendering */
+.mathpix-mmd {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		'Helvetica Neue', Arial, sans-serif;
+}
+
+.mathpix-mmd p {
+	margin: 0 0 10px;
+}
+
+.mathpix-mmd .math-inline {
+	display: inline-block;
+	margin: 0 2px;
+}
+
+.mathpix-mmd .math-block {
+	display: block;
+	margin: 10px 0;
+	text-align: center;
+}
+
+/* Style for bold text rendered from ** markers */
+.mathpix-mmd strong {
+	font-weight: 600;
+	color: #333;
+}
+
+/* Style for options */
+.mathpix-mmd p strong:first-child {
+	color: #1890ff;
+}
+
+/* Math equation styles */
+.mathpix-mmd mjx-container {
+	margin: 4px 0;
+}
+
+.mathpix-mmd mjx-container[display='true'] {
+	margin: 12px 0;
+}

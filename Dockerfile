@@ -35,9 +35,9 @@ COPY --from=builder --chown=refine:nodejs /app/refine/.next/static ./.next/stati
 
 USER refine
 
-EXPOSE 3000
+EXPOSE 3050
 
-ENV PORT 3000
+ENV PORT 3050
 ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]

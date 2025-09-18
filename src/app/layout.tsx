@@ -63,6 +63,13 @@ export default async function RootLayout({
                           canDelete: true,
                         },
                       },
+                      {
+                        name: "questions",
+                        list: "/questions",
+                        meta: {
+                          label: "Questions",
+                        },
+                      },
                     ]}
                     options={{
                       syncWithLocation: true,
