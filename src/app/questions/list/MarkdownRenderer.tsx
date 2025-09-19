@@ -166,6 +166,7 @@ export function MarkdownRenderer({
                                 e.target.value
                               )
                             }
+                            onFocus={(e) => e.target.select()}
                             style={{ width: "100px" }}
                             size="small"
                             prefix="Level:"
@@ -182,6 +183,7 @@ export function MarkdownRenderer({
                                 e.target.value
                               )
                             }
+                            onFocus={(e) => e.target.select()}
                             style={{ width: "100px" }}
                             size="small"
                             prefix="Ans:"
