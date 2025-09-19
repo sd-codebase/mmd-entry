@@ -18,6 +18,15 @@ export function QuestionContainer() {
     setProcessedContent(null);
     message.info("Cleared");
   };
+
+  const handleQuestionsSaved = () => {
+    setText("");
+    setWarnings([]);
+    setSummary([]);
+    setProcessedContent(null);
+    setSelectedChapterState(null);
+    message.success("Questions saved and editor cleared.");
+  };
   const [text, setText] = useState("");
   const [warnings, setWarnings] = useState<string[]>([]);
   const [summary, setSummary] = useState<string[]>([]);
@@ -71,7 +80,11 @@ export function QuestionContainer() {
         />
 
         <div style={{ marginBottom: "16px", display: "flex", gap: "8px" }}>
-          <Button type="primary" onClick={handleSubmit}>
+          <Button
+            type="primary"
+            onClick={handleSubmit}
+            disabled={!selectedChapterState}
+          >
             Parse Markdown
           </Button>
           <Button onClick={handleClear}>Clear</Button>
@@ -132,6 +145,7 @@ export function QuestionContainer() {
         <MarkdownRenderer
           content={processedContent}
           topics={selectedChapterState}
+          onQuestionsSaved={handleQuestionsSaved}
         />
 
         {/* Go To Top Button */}

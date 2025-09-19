@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Card, Input, Row, Col, Divider, Typography, Empty } from "antd";
+import {
+  Card,
+  Input,
+  Row,
+  Col,
+  Divider,
+  Typography,
+  Empty,
+  message,
+} from "antd";
 import type { TopicLevelMap, MappedQuestion } from "./parser/splitter";
 import { QuestionPreview } from "./question-preview";
 
@@ -9,10 +18,12 @@ const { Title, Text } = Typography;
 interface MarkdownRendererProps {
   content?: TopicLevelMap | null;
   topics?: Record<string, { topic: string; chapter: string; subject: string }>;
+  onQuestionsSaved?: () => void;
 }
 
 interface EditedQuestionData {
   questionContent?: string;
+  questionNumber?: string;
   topic: string;
   content: string;
   level: string;
@@ -26,7 +37,9 @@ const Topics: Record<
 export function MarkdownRenderer({
   content,
   topics = Topics,
+  onQuestionsSaved,
 }: MarkdownRendererProps) {
+  const [messageApi, contextHolder] = message.useMessage();
   const [editedQuestions, setEditedQuestions] = useState<
     Record<string, EditedQuestionData>
   >({});
@@ -84,19 +97,46 @@ export function MarkdownRenderer({
     const flatQuestions = Object.entries(editedQuestions).map(([id, data]) => {
       // id format: topic-questionNumber
       // Use topics prop to map topic object
-
       const newData = {
         ...data,
+        srNo: data.questionNumber,
         topic: topics[data.topic],
       };
       delete newData.questionContent;
+      delete newData.questionNumber;
       return newData;
     });
     console.log("Edited Questions (flattened):", flatQuestions);
+
+    // Call POST API to save questions
+    fetch("/api/questions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(flatQuestions),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error?.error || "Failed to save questions");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Questions saved:", data);
+        messageApi.success("Questions saved successfully!");
+        if (onQuestionsSaved) onQuestionsSaved();
+      })
+      .catch((err) => {
+        console.error("Error saving questions:", err);
+        messageApi.error("Failed to save questions: " + err.message);
+      });
   };
 
   return (
     <Card title="Processed Content" style={{ marginTop: "16px" }}>
+      {contextHolder}
       {Object.entries(content).map(([topic, questions]) => (
         <div key={topic} style={{ marginBottom: "32px" }}>
           <Title level={4}>{topic}</Title>
