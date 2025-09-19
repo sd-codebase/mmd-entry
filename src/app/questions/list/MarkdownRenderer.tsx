@@ -9,21 +9,17 @@ import {
   Empty,
   message,
 } from "antd";
-import type { TopicLevelMap, MappedQuestion } from "./parser/splitter";
-import { QuestionPreview } from "./question-preview";
+import { QuestionPreview } from "../question-preview";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
 interface MarkdownRendererProps {
-  content?: TopicLevelMap | null;
-  topics?: Record<string, { topic: string; chapter: string; subject: string }>;
+  questionsByTopic: Record<string, any[]>;
   onQuestionsSaved?: () => void;
 }
 
 interface EditedQuestionData {
-  questionContent?: string;
-  questionNumber?: string;
   topic: string;
   content: string;
   level: string;
@@ -35,8 +31,7 @@ const Topics: Record<
   { topic: string; chapter: string; subject: string }
 > = {};
 export function MarkdownRenderer({
-  content,
-  topics = Topics,
+  questionsByTopic,
   onQuestionsSaved,
 }: MarkdownRendererProps) {
   const [messageApi, contextHolder] = message.useMessage();
@@ -46,22 +41,19 @@ export function MarkdownRenderer({
 
   // Initialize editedQuestions with content when content changes
   useEffect(() => {
-    if (content) {
+    if (questionsByTopic) {
       const initialContent: Record<string, EditedQuestionData> = {};
-      Object.entries(content).forEach(([topic, questions]) => {
-        questions.forEach((question: MappedQuestion) => {
-          const questionId = `${topic}-${question.questionNumber}`;
+      Object.entries(questionsByTopic).forEach(([topicKey, questions]) => {
+        questions.forEach((question: any) => {
+          const questionId = `${topicKey}-${question.srNo}`;
           initialContent[questionId] = {
             ...question,
-            content: question.questionContent,
-            level: question.level,
-            answer: question.answer,
           };
         });
       });
       setEditedQuestions(initialContent);
     }
-  }, [content]);
+  }, [questionsByTopic]);
 
   const handleQuestionEdit = (
     questionId: string,
@@ -81,7 +73,7 @@ export function MarkdownRenderer({
     return `${topic}-${questionNumber}`;
   };
 
-  if (!content || Object.keys(content).length === 0) {
+  if (!questionsByTopic || Object.keys(questionsByTopic).length === 0) {
     return (
       <Card
         title="Processed Content"
@@ -96,21 +88,17 @@ export function MarkdownRenderer({
     // Flatten editedQuestions and map topic names using selectedChapterState (topics prop)
     const flatQuestions = Object.entries(editedQuestions).map(([id, data]) => {
       // id format: topic-questionNumber
-      // Use topics prop to map topic object
+      // Use Topics to map topic object
       const newData = {
         ...data,
-        srNo: data.questionNumber,
-        topic: topics[data.topic],
       };
-      delete newData.questionContent;
-      delete newData.questionNumber;
       return newData;
     });
     console.log("Edited Questions (flattened):", flatQuestions);
 
-    // Call POST API to save questions
+    // Call PUT API to save questions
     fetch("/api/questions", {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -126,6 +114,7 @@ export function MarkdownRenderer({
       .then((data) => {
         console.log("Questions saved:", data);
         messageApi.success("Questions saved successfully!");
+        setEditedQuestions({});
         if (onQuestionsSaved) onQuestionsSaved();
       })
       .catch((err) => {
@@ -134,22 +123,29 @@ export function MarkdownRenderer({
       });
   };
 
+  if (Object.keys(editedQuestions).length === 0) {
+    return (
+      <Card
+        title="Processed Content"
+        style={{ marginTop: "16px", minHeight: "200px" }}
+      >
+        <Empty description="No questions available to display." />
+      </Card>
+    );
+  }
+
   return (
     <Card title="Processed Content" style={{ marginTop: "16px" }}>
       {contextHolder}
-      {Object.entries(content).map(([topic, questions]) => (
-        <div key={topic} style={{ marginBottom: "32px" }}>
-          <Title level={4}>{topic}</Title>
+      {Object.entries(questionsByTopic).map(([topicKey, questions]) => (
+        <div key={topicKey} style={{ marginBottom: "32px" }}>
+          <Title level={4}>
+            {topicKey}- {questions[0].topic.topic}
+          </Title>
           <Divider />
-
-          {questions.map((question: MappedQuestion) => {
-            const questionId = getQuestionId(topic, question.questionNumber);
-            const questionData = editedQuestions[questionId] || {
-              content: "",
-              level: "",
-              answer: "",
-            };
-
+          {questions.map((question: any) => {
+            const questionId = getQuestionId(topicKey, question.srNo);
+            const questionData = editedQuestions[questionId];
             return (
               <div key={questionId} style={{ marginBottom: "24px" }}>
                 <Row gutter={16}>
@@ -157,12 +153,12 @@ export function MarkdownRenderer({
                     <div style={{ marginBottom: "12px" }}>
                       <Row gutter={8} align="middle">
                         <Col>
-                          <Text strong>Question {question.questionNumber}</Text>
+                          <Text strong>Question {question.srNo}</Text>
                         </Col>
                         <Col>
                           <Input
                             placeholder="Level"
-                            value={questionData.level}
+                            value={questionData?.level}
                             onChange={(e) =>
                               handleQuestionEdit(
                                 questionId,
@@ -178,7 +174,7 @@ export function MarkdownRenderer({
                         <Col>
                           <Input
                             placeholder="Answer"
-                            value={questionData.answer}
+                            value={questionData?.answer}
                             onChange={(e) =>
                               handleQuestionEdit(
                                 questionId,
@@ -258,7 +254,7 @@ export function MarkdownRenderer({
           }}
           onClick={handleSubmit}
         >
-          Save All
+          Update All
         </button>
       </div>
     </Card>
