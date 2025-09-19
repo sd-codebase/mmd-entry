@@ -5,6 +5,8 @@ import { Alert, Button, Input, message } from "antd";
 import { useState } from "react";
 import { mapQuestionsAndAnswers, TopicLevelMap } from "./parser/splitter";
 import { MarkdownRenderer } from "./markdown-renderer";
+import { formatTopicsFromJson } from "./parser/format-topics-from-json";
+import { SubjectChapterDropdowns } from "./SubjectChapterDropdowns";
 
 const { TextArea } = Input;
 
@@ -21,6 +23,7 @@ export function QuestionContainer() {
   const [summary, setSummary] = useState<string[]>([]);
   const [processedContent, setProcessedContent] =
     useState<TopicLevelMap | null>(null);
+  const [selectedChapterState, setSelectedChapterState] = useState<any>(null);
 
   const handleSubmit = () => {
     const result = mapQuestionsAndAnswers(text);
@@ -51,14 +54,28 @@ export function QuestionContainer() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleFormatTopics = async () => {
+    await formatTopicsFromJson();
+  };
+
   return (
     <List>
       <div style={{ padding: "24px", position: "relative" }}>
+        {/* Dropdowns for Subject and Chapter selection */}
+        <SubjectChapterDropdowns
+          onChapterSelect={(selection) => {
+            setSelectedChapterState(selection);
+            // You can also log or use this state elsewhere as needed
+            console.log("Selected Chapter State:", selection);
+          }}
+        />
+
         <div style={{ marginBottom: "16px", display: "flex", gap: "8px" }}>
           <Button type="primary" onClick={handleSubmit}>
             Parse Markdown
           </Button>
           <Button onClick={handleClear}>Clear</Button>
+          {/* <Button onClick={handleFormatTopics}>Format Topics</Button> */}
         </div>
 
         {/* Display summary if any */}
@@ -105,7 +122,7 @@ export function QuestionContainer() {
         )}
 
         <TextArea
-          rows={20}
+          rows={30}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Paste your markdown content here..."
@@ -113,7 +130,10 @@ export function QuestionContainer() {
         />
 
         {/* Markdown Renderer Component */}
-        <MarkdownRenderer content={processedContent} />
+        <MarkdownRenderer
+          content={processedContent}
+          topics={selectedChapterState}
+        />
 
         {/* Go To Top Button */}
         <Button

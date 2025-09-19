@@ -8,7 +8,7 @@ const { Title, Text } = Typography;
 
 interface MarkdownRendererProps {
   content?: TopicLevelMap | null;
-  topics?: Record<string, string>; // topic to levels mapping
+  topics?: Record<string, { topic: string; chapter: string; subject: string }>;
 }
 
 interface EditedQuestionData {
@@ -19,11 +19,10 @@ interface EditedQuestionData {
   answer: string;
 }
 
-const Topics = {
-  "Topic 1": "Math",
-  "Topic 2": "Science",
-  "Topic 3": "History",
-};
+const Topics: Record<
+  string,
+  { topic: string; chapter: string; subject: string }
+> = {};
 export function MarkdownRenderer({
   content,
   topics = Topics,
@@ -81,10 +80,11 @@ export function MarkdownRenderer({
   }
 
   const handleSubmit = () => {
-    // Flatten editedQuestions and map topic names
+    // Flatten editedQuestions and map topic names using selectedChapterState (topics prop)
     const flatQuestions = Object.entries(editedQuestions).map(([id, data]) => {
       // id format: topic-questionNumber
-      // const [topicKey, questionNumber] = id.split(/-(.+)/); // split only on first dash
+      // Use topics prop to map topic object
+
       const newData = {
         ...data,
         topic: topics[data.topic],
@@ -162,7 +162,7 @@ export function MarkdownRenderer({
                           e.target.value
                         )
                       }
-                      autoSize={{ minRows: 4, maxRows: 16 }}
+                      autoSize={{ minRows: 10, maxRows: 24 }}
                       style={{ fontFamily: "monospace", fontSize: "13px" }}
                     />
                   </Col>
