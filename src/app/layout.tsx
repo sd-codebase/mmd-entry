@@ -69,6 +69,13 @@ export default async function RootLayout({
                           label: "Questions",
                         },
                       },
+                      {
+                        name: "question-list",
+                        list: "/questions/list",
+                        meta: {
+                          label: "Question List",
+                        },
+                      },
                     ]}
                     options={{
                       syncWithLocation: true,

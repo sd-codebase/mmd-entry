@@ -69,7 +69,7 @@ export function QuestionContainer() {
 
   return (
     <List>
-      <div style={{ padding: "24px", position: "relative" }}>
+      <div style={{}}>
         {/* Dropdowns for Subject and Chapter selection */}
         <SubjectChapterDropdowns
           onChapterSelect={(selection) => {
