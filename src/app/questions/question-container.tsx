@@ -93,7 +93,6 @@ export function QuestionContainer() {
                   ))}
                 </ul>
               }
-              style={{ background: "#e6f7ff", borderColor: "#91d5ff" }}
               showIcon
             />
           </div>
